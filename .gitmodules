@@ -1,0 +1,10 @@
+[submodule "libdragon"]
+	path = libdragon
+	url = https://github.com/DragonMinded/libdragon
+	branch = preview
+[submodule "tiny3d"]
+	path = tiny3d
+	url = https://github.com/HailToDodongo/tiny3d
+[submodule "cosmoslib64"]
+	path = cosmoslib64
+	url = https://github.com/sstarbright/cosmoslib64

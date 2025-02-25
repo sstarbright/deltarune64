@@ -1,0 +1,26 @@
+{
+    "version": 4,
+    "env": {
+        "N64_INST": "${workspaceFolder}/../libdragon_toolchain"
+    },
+    "configurations": [
+        {
+            "name": "N64-LibDragon",
+            "defines": ["N64=1"],
+            "includePath": [
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/../libdragon_toolchain/mips64-elf/include"
+            ],
+            "compilerPath": "${workspaceFolder}/../libdragon_toolchain/bin/mips64-elf-gcc",
+            "compilerArgs": [
+                "-march=vr4300",
+                "-mtune=vr4300",
+                "-Wall",
+                "-Werror"
+            ],
+            "cStandard": "gnu11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ]
+}
