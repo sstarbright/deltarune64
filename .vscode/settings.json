@@ -47,7 +47,10 @@
         "coshash.h": "c",
         "cosams.h": "c",
         "vec.h": "c",
-        "costrans.h": "c"
+        "costrans.h": "c",
+        "ranges": "c",
+        "algorithm": "c",
+        "cstdint": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

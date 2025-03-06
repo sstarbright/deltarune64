@@ -1,0 +1,5 @@
+OrbitStage - Spins around while watching the whole stage. Zoom in and out with sine?
+OrbitCharacter - Spins around character (Can limit to a quarter turn to face character during action/receive action)
+FaceCharacter - Camera faces the front of character, follows
+SlideCharacter - Slides in front of character. Could orbit a bit as well for more dynamic
+WatchCharacter - Still Camera from random side/above angle

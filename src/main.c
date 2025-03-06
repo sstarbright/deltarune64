@@ -9,10 +9,10 @@ int main(void)
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2,
         GAMMA_NONE, FILTERS_RESAMPLE_ANTIALIAS);
     rdpq_init();
-    int dfs_handle = dfs_init(DFS_DEFAULT_LOCATION);
+    dfs_init(DFS_DEFAULT_LOCATION);
     joypad_init();
 
-    sprite_t *test_sprite = sprite_load("rom:/test.ci4.sprite");
+    t3d_init((T3DInitParams){});
 
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
@@ -24,15 +24,13 @@ int main(void)
         rdpq_attach(display_get(), NULL);
         
         rdpq_set_mode_standard();
+        rdpq_sync_pipe();
         debug_log_draw();
         rdpq_detach_show();
     }
 
-    sprite_free(test_sprite);
-    test_sprite = NULL;
-
+    t3d_destroy();
     joypad_close();
-    dfs_close(dfs_handle);
     rdpq_close();
     display_close();
 
