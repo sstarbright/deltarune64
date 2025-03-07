@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cppdbg",
+            "request":"launch",
+            "name": "Launch Program",
+            "program":"${workspaceFolder}/ares/ares.exe",
+            "args":["${workspaceFolder}/deltarune64.z64"],
+            "preLaunchTask": "Build rom",
+            "cwd": "./"
+        }
+    ],
+    "compounds": []
+}
