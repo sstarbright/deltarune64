@@ -34,21 +34,11 @@ int main(void)
     actor_add_module(jevil, jevil_mesh, false);
     module_init(jevil_mesh);
     RenderableModule* jevil_render = (RenderableModule*)jevil_mesh->data;
-    Trans3DModule* jevil_trans = (Trans3DModule*)jevil_mesh->next->data;
-    /*jevil_trans->scale.x = 0.8f;
-    jevil_trans->scale.y = 0.8f;
-    jevil_trans->scale.z = 0.8f;*/
+    Trans3DModule* jevil_trans = ((Mesh3DModule*)jevil_render->data)->transform;
 
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
     rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, fnt);
-
-    debug_log_init();
-
-    char full_buf[30];
-    snprintf(full_buf, 20, "%f", jevil_trans->scale.x);
-    strcat(full_buf, "\n");
-    debugf(full_buf);
 
     color_t test_light = (color_t){0xFF, 0x00, 0x00, 0xFF};
 
@@ -64,7 +54,10 @@ int main(void)
         t3d_viewport_set_projection(&viewport, T3D_DEG_TO_RAD(85.0f), 10.0f, 150.0f);
         t3d_viewport_look_at(&viewport, &camPos, &camTarget, &(T3DVec3){{0,1,0}});
 
-        actor_life(jevil, deltaTime, matrixIdx);
+        jevil_trans->rotation.y += deltaTime * 1.f;
+        trans3D_update_matrix(jevil_trans);
+
+        actor_life(jevil, deltaTime);
 
         rdpq_attach(display_get(), display_get_zbuf());
         t3d_frame_start();
@@ -81,7 +74,6 @@ int main(void)
         jevil_render->draw(jevil_render, deltaTime, matrixIdx);
 
         rdpq_sync_pipe();
-        debug_log_draw();
 
         rdpq_detach_show();
     }
