@@ -36,6 +36,8 @@ int main(void)
     RenderableModule* jevil_render = (RenderableModule*)jevil_mesh->data;
     Trans3DModule* jevil_trans = ((Mesh3DModule*)jevil_render->data)->transform;
 
+    debugf("%p", jevil_trans);
+
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
     rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, fnt);
@@ -44,7 +46,23 @@ int main(void)
 
     float lastTime = get_time_s() - (1.0f / 60.0f);
 
+
+    audio_init(44100, 4);
+    mixer_init(8);
+    xm64player_t xm;
+    xm64player_open(&xm, "rom:/trk_jevil_battle.xm64");
+    xm64player_play(&xm, 0);
+
     for (uint32_t frame=0; ;++frame) {
+        if (audio_can_write()) {
+            // Select an audio buffer that we can write to
+            short *buf = audio_write_begin();
+            // Write to the audio buffer from the mixer
+            mixer_poll(buf, audio_get_buffer_length());
+            // Tell the audio system that the buffer has
+            // been filled and is ready for playback
+            audio_write_end();
+        }
         float newTime = get_time_s();
         float deltaTime = newTime - lastTime;
         lastTime = newTime;
