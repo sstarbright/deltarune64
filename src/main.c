@@ -30,13 +30,13 @@ int main(void)
 
     Actor* jevil = malloc(sizeof(Actor));
     actor_init(jevil, "ENEMYJevil");
-    Module* jevil_mesh = mesh3D_module_create("Jevil");
-    actor_add_module(jevil, jevil_mesh, false);
-    module_init(jevil_mesh);
-    RenderableModule* jevil_render = (RenderableModule*)jevil_mesh->data;
-    Trans3DModule* jevil_trans = ((Mesh3DModule*)jevil_render->data)->transform;
 
-    debugf("%p", jevil_trans);
+    Mesh3DModule* jevil_mesh = malloc(sizeof(Mesh3DModule));
+    mesh3D_module_create(jevil_mesh, "Jevil");
+    actor_add_module(jevil, (Module*)jevil_mesh, false);
+    module_init((Module*)jevil_mesh);
+
+    Trans3DModule* jevil_trans = &jevil_mesh->render.transform;
 
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
@@ -45,7 +45,6 @@ int main(void)
     color_t test_light = (color_t){0xFF, 0x00, 0x00, 0xFF};
 
     float lastTime = get_time_s() - (1.0f / 60.0f);
-
 
     audio_init(44100, 4);
     mixer_init(8);
@@ -89,7 +88,7 @@ int main(void)
         rdpq_set_prim_color((color_t){0x00, 0x00, 0x00, 0xFF});
         t3d_light_set_ambient(colorAmbient);
 
-        jevil_render->draw(jevil_render, deltaTime, matrixIdx);
+        jevil_mesh->render.draw(&jevil_mesh->render, deltaTime, matrixIdx);
 
         rdpq_sync_pipe();
 
