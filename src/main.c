@@ -20,13 +20,13 @@ int main(void)
     
     T3DViewport viewport = t3d_viewport_create();
     
-    T3DVec3 camPos    = {{0, 0, 140}};
+    T3DVec3 camPos    = {{0, 50, 140}};
     T3DVec3 camTarget = {{0, 50, 0}};
 
     T3DVec3 lightDirVec = {{1.0f, 1.0f, 1.0f}};
     t3d_vec3_norm(&lightDirVec);
 
-    uint8_t colorAmbient[4] = {0x22, 0x11, 0x22, 0xFF};
+    uint8_t colorAmbient[4] = {0x16, 0x11, 0x22, 0xFF};
 
     Actor* jevil = malloc(sizeof(Actor));
     actor_init(jevil, "ENEMYJevil");
@@ -80,7 +80,7 @@ int main(void)
         t3d_frame_start();
 
         t3d_viewport_attach(&viewport);
-        t3d_screen_clear_color(RGBA32(0x11, 0x05, 0x11, 0xFF));
+        t3d_screen_clear_color(RGBA32(0x07, 0x05, 0x11, 0xFF));
         t3d_screen_clear_depth();
         t3d_light_set_count(1);
         t3d_light_set_directional(0, &test_light.r, &(T3DVec3){{ 1.0f,  0.5f, 0.0f }});
