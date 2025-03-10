@@ -26,7 +26,7 @@ int main(void)
     T3DVec3 lightDirVec = {{1.0f, 1.0f, 1.0f}};
     t3d_vec3_norm(&lightDirVec);
 
-    uint8_t colorAmbient[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t colorAmbient[4] = {0x22, 0x11, 0x22, 0xFF};
 
     Actor* jevil = malloc(sizeof(Actor));
     actor_init(jevil, "ENEMYJevil");
@@ -42,7 +42,7 @@ int main(void)
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
     rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, fnt);
 
-    color_t test_light = (color_t){0xFF, 0x00, 0x00, 0xFF};
+    color_t test_light = (color_t){0xFF, 0xFF, 0xFF, 0xFF};
 
     float lastTime = get_time_s() - (1.0f / 60.0f);
 
@@ -80,12 +80,11 @@ int main(void)
         t3d_frame_start();
 
         t3d_viewport_attach(&viewport);
-        t3d_screen_clear_color(RGBA32(140, 227, 237, 0xFF));
+        t3d_screen_clear_color(RGBA32(0x11, 0x05, 0x11, 0xFF));
         t3d_screen_clear_depth();
         t3d_light_set_count(1);
-        t3d_light_set_directional(0, &test_light.r, &(T3DVec3){{ 1.0f,  1.0f, 0.0f }});
+        t3d_light_set_directional(0, &test_light.r, &(T3DVec3){{ 1.0f,  0.5f, 0.0f }});
 
-        rdpq_set_prim_color((color_t){0x00, 0x00, 0x00, 0xFF});
         t3d_light_set_ambient(colorAmbient);
 
         jevil_mesh->render.draw(&jevil_mesh->render, deltaTime, matrixIdx);
