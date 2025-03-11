@@ -19,7 +19,7 @@ int main(void)
     load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil");
     
     T3DVec3 lightScale = {{1.f, 1.f, 1.f}};
-    T3DVec3 lightRotation = {{0.f, 0.f, 0.f}};
+    T3DVec3 lightRotation = {{-1.5708f, 0.f, 0.f}};
     T3DVec3 lightPosition = {{0.f, 0.f, 0.f}};
 
     T3DMat4 direction_mat;
@@ -42,7 +42,6 @@ int main(void)
     actor_add_module(jevil, (Module*)jevil_camera, false);
     module_init((Module*)jevil_camera);
     Trans3DModule* jevil_cam_trans = &jevil_camera->render.transform;
-    trans3d_add_child(jevil_trans, jevil_cam_trans);
     jevil_cam_trans->position.y = 50.f;
     jevil_cam_trans->position.z = 140.f;
     trans3d_update_matrix(jevil_cam_trans);
@@ -77,23 +76,42 @@ int main(void)
 
         uint32_t matrixIdx = frame % display_get_num_buffers();
 
+        jevil_trans->rotation.y += deltaTime*15.f;
+        trans3d_update_matrix(jevil_trans);
+
+        jevil_cam_trans->rotation.y += deltaTime*1.f;
+        trans3d_update_matrix(jevil_cam_trans);
+
+        // Update stages here
         actor_life(jevil, deltaTime);
 
         rdpq_attach(display_get(), display_get_zbuf());
         t3d_frame_start();
 
+        // Draw Camera here
         jevil_camera->render.draw(&jevil_camera->render, deltaTime, matrixIdx);
 
         t3d_screen_clear_color(RGBA32(0x07, 0x05, 0x11, 0xFF));
         t3d_screen_clear_depth();
+
+        // Draw lights here
         t3d_light_set_count(1);
         t3d_light_set_directional(0, &test_light.r, &direction_vector);
 
         t3d_light_set_ambient(colorAmbient);
 
+        // Draw meshes here
         jevil_mesh->render.draw(&jevil_mesh->render, deltaTime, matrixIdx);
 
         rdpq_sync_pipe();
+
+        rdpq_set_mode_standard();
+        
+        /* Code we can use to overlay colors on screen
+        rdpq_mode_blender(RDPQ_BLENDER_MULTIPLY);
+        rdpq_mode_combiner(RDPQ_COMBINER_FLAT);
+        rdpq_set_prim_color(RGBA32(0xFF,0xFF,0xFF,0xFF));
+        rdpq_fill_rectangle(0, 0, display_get_width(), display_get_height());*/
 
         rdpq_detach_show();
     }

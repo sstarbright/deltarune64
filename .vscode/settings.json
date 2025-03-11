@@ -52,7 +52,8 @@
         "algorithm": "c",
         "cstdint": "c",
         "coscam.h": "c",
-        "compare": "cpp"
+        "compare": "cpp",
+        "cosmesh.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
