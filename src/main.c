@@ -1,4 +1,4 @@
-#include "../cosmoslib64/cosmesh.h"
+#include "../cosmoslib64/coscam.h"
 #include "../cosmoslib64/cosdebug.h"
 
 float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
@@ -18,13 +18,13 @@ int main(void)
     model_cache_create(1);
     load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil");
     
-    T3DViewport viewport = t3d_viewport_create();
-    
-    T3DVec3 camPos    = {{0, 50, 140}};
-    T3DVec3 camTarget = {{0, 50, 0}};
+    T3DVec3 lightScale = {{1.f, 1.f, 1.f}};
+    T3DVec3 lightRotation = {{0.f, 0.f, 0.f}};
+    T3DVec3 lightPosition = {{0.f, 0.f, 0.f}};
 
-    T3DVec3 lightDirVec = {{1.0f, 1.0f, 1.0f}};
-    t3d_vec3_norm(&lightDirVec);
+    T3DMat4 direction_mat;
+    t3d_mat4_from_srt_euler(&direction_mat, lightScale.v, lightRotation.v, lightPosition.v);
+    T3DVec3 direction_vector = {{direction_mat.m[2][0], direction_mat.m[2][1], direction_mat.m[2][2]}};
 
     uint8_t colorAmbient[4] = {0x16, 0x11, 0x22, 0xFF};
 
@@ -32,11 +32,20 @@ int main(void)
     actor_init(jevil, "ENEMYJevil");
 
     Mesh3DModule* jevil_mesh = malloc(sizeof(Mesh3DModule));
-    mesh3D_module_create(jevil_mesh, "Jevil");
+    mesh3d_module_create(jevil_mesh, "Jevil");
     actor_add_module(jevil, (Module*)jevil_mesh, false);
     module_init((Module*)jevil_mesh);
-
     Trans3DModule* jevil_trans = &jevil_mesh->render.transform;
+
+    Camera3DModule* jevil_camera = malloc(sizeof(Camera3DModule));
+    camera3d_module_create(jevil_camera, "JevilCam");
+    actor_add_module(jevil, (Module*)jevil_camera, false);
+    module_init((Module*)jevil_camera);
+    Trans3DModule* jevil_cam_trans = &jevil_camera->render.transform;
+    trans3d_add_child(jevil_trans, jevil_cam_trans);
+    jevil_cam_trans->position.y = 50.f;
+    jevil_cam_trans->position.z = 140.f;
+    trans3d_update_matrix(jevil_cam_trans);
 
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
@@ -68,22 +77,17 @@ int main(void)
 
         uint32_t matrixIdx = frame % display_get_num_buffers();
 
-        t3d_viewport_set_projection(&viewport, T3D_DEG_TO_RAD(85.0f), 10.0f, 150.0f);
-        t3d_viewport_look_at(&viewport, &camPos, &camTarget, &(T3DVec3){{0,1,0}});
-
-        jevil_trans->rotation.y += deltaTime * 1.f;
-        trans3D_update_matrix(jevil_trans);
-
         actor_life(jevil, deltaTime);
 
         rdpq_attach(display_get(), display_get_zbuf());
         t3d_frame_start();
 
-        t3d_viewport_attach(&viewport);
+        jevil_camera->render.draw(&jevil_camera->render, deltaTime, matrixIdx);
+
         t3d_screen_clear_color(RGBA32(0x07, 0x05, 0x11, 0xFF));
         t3d_screen_clear_depth();
         t3d_light_set_count(1);
-        t3d_light_set_directional(0, &test_light.r, &(T3DVec3){{ 1.0f,  0.5f, 0.0f }});
+        t3d_light_set_directional(0, &test_light.r, &direction_vector);
 
         t3d_light_set_ambient(colorAmbient);
 
