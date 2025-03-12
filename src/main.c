@@ -1,4 +1,5 @@
 #include "../cosmoslib64/coscam.h"
+#include "../cosmoslib64/coslite.h"
 #include "../cosmoslib64/cosdebug.h"
 
 float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
@@ -34,23 +35,35 @@ int main(void)
     Mesh3DModule* jevil_mesh = malloc(sizeof(Mesh3DModule));
     mesh3d_module_create(jevil_mesh, "Jevil");
     actor_add_module(jevil, (Module*)jevil_mesh, false);
-    module_init((Module*)jevil_mesh);
     Trans3DModule* jevil_trans = &jevil_mesh->render.transform;
 
     Camera3DModule* jevil_camera = malloc(sizeof(Camera3DModule));
     camera3d_module_create(jevil_camera, "JevilCam");
     actor_add_module(jevil, (Module*)jevil_camera, false);
-    module_init((Module*)jevil_camera);
     Trans3DModule* jevil_cam_trans = &jevil_camera->render.transform;
     jevil_cam_trans->position.y = 50.f;
     jevil_cam_trans->position.z = 140.f;
     trans3d_update_matrix(jevil_cam_trans);
 
+    DirLite3DModule* test_light = malloc(sizeof(DirLite3DModule));
+    dirlite3d_module_create(test_light, "TestLight");
+    actor_add_module(jevil, (Module*)test_light, false);
+    Trans3DModule* test_light_trans = &test_light->render.transform;
+
+    Trans3DModule* point_light_rotator = malloc(sizeof(Trans3DModule));
+    trans3d_module_create(point_light_rotator, "PntLightRot");
+
+    PntLite3DModule* test_point_light = malloc(sizeof(PntLite3DModule));
+    pntlite3d_module_create(test_point_light, "TestPntLight");
+    test_point_light->size = .05f;
+    Trans3DModule* point_light_trans = (Trans3DModule*)test_point_light;
+    point_light_trans->position.y = 50.f;
+    point_light_trans->position.z = 50.f;
+    trans3d_add_child(point_light_rotator, point_light_trans);
+
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
     rdpq_text_register_font(FONT_BUILTIN_DEBUG_MONO, fnt);
-
-    color_t test_light = (color_t){0xFF, 0xFF, 0xFF, 0xFF};
 
     float lastTime = get_time_s() - (1.0f / 60.0f);
 
@@ -76,14 +89,13 @@ int main(void)
 
         uint32_t matrixIdx = frame % display_get_num_buffers();
 
-        jevil_trans->rotation.y += deltaTime*15.f;
-        trans3d_update_matrix(jevil_trans);
-
-        jevil_cam_trans->rotation.y += deltaTime*1.f;
-        trans3d_update_matrix(jevil_cam_trans);
+        coslite_new_frame();
 
         // Update stages here
         actor_life(jevil, deltaTime);
+
+        test_light_trans->rotation.y += deltaTime * 3.f;
+        trans3d_update_matrix(test_light_trans);
 
         rdpq_attach(display_get(), display_get_zbuf());
         t3d_frame_start();
@@ -94,9 +106,10 @@ int main(void)
         t3d_screen_clear_color(RGBA32(0x07, 0x05, 0x11, 0xFF));
         t3d_screen_clear_depth();
 
+        t3d_light_set_count(coslite_get_count());
         // Draw lights here
-        t3d_light_set_count(1);
-        t3d_light_set_directional(0, &test_light.r, &direction_vector);
+        test_light->render.draw(&test_light->render, deltaTime, matrixIdx);
+        //test_point_light->render.draw(&test_point_light->render, deltaTime, matrixIdx);
 
         t3d_light_set_ambient(colorAmbient);
 

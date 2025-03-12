@@ -53,7 +53,9 @@
         "cstdint": "c",
         "coscam.h": "c",
         "compare": "cpp",
-        "cosmesh.h": "c"
+        "cosmesh.h": "c",
+        "stack": "c",
+        "valarray": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
