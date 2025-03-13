@@ -17,17 +17,7 @@ int main(void)
     t3d_init((T3DInitParams){});
     cosmesh_init();
     model_cache_create(1);
-    load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil");
-    
-    T3DVec3 lightScale = {{1.f, 1.f, 1.f}};
-    T3DVec3 lightRotation = {{-1.5708f, 0.f, 0.f}};
-    T3DVec3 lightPosition = {{0.f, 0.f, 0.f}};
-
-    T3DMat4 direction_mat;
-    t3d_mat4_from_srt_euler(&direction_mat, lightScale.v, lightRotation.v, lightPosition.v);
-    T3DVec3 direction_vector = {{direction_mat.m[2][0], direction_mat.m[2][1], direction_mat.m[2][2]}};
-
-    uint8_t colorAmbient[4] = {0x16, 0x11, 0x22, 0xFF};
+    load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil", 0, 0);
 
     Actor* jevil = malloc(sizeof(Actor));
     actor_init(jevil, "ENEMYJevil");
@@ -44,22 +34,6 @@ int main(void)
     jevil_cam_trans->position.y = 50.f;
     jevil_cam_trans->position.z = 140.f;
     trans3d_update_matrix(jevil_cam_trans);
-
-    DirLite3DModule* test_light = malloc(sizeof(DirLite3DModule));
-    dirlite3d_module_create(test_light, "TestLight");
-    actor_add_module(jevil, (Module*)test_light, false);
-    Trans3DModule* test_light_trans = &test_light->render.transform;
-
-    Trans3DModule* point_light_rotator = malloc(sizeof(Trans3DModule));
-    trans3d_module_create(point_light_rotator, "PntLightRot");
-
-    PntLite3DModule* test_point_light = malloc(sizeof(PntLite3DModule));
-    pntlite3d_module_create(test_point_light, "TestPntLight");
-    test_point_light->size = .05f;
-    Trans3DModule* point_light_trans = (Trans3DModule*)test_point_light;
-    point_light_trans->position.y = 50.f;
-    point_light_trans->position.z = 50.f;
-    trans3d_add_child(point_light_rotator, point_light_trans);
 
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
@@ -108,10 +82,8 @@ int main(void)
 
         t3d_light_set_count(coslite_get_count());
         // Draw lights here
-        test_light->render.draw(&test_light->render, deltaTime, matrixIdx);
-        //test_point_light->render.draw(&test_point_light->render, deltaTime, matrixIdx);
 
-        t3d_light_set_ambient(colorAmbient);
+        t3d_light_set_ambient({0x16, 0x11, 0x22, 0xFF});
 
         // Draw meshes here
         jevil_mesh->render.draw(&jevil_mesh->render, deltaTime, matrixIdx);

@@ -4,9 +4,18 @@
         {
             "type": "cppdbg",
             "request":"launch",
-            "name": "Launch Program",
+            "name": "Launch Ares",
             "program":"${workspaceFolder}\\ares\\ares.exe",
             "args":["${workspaceFolder}\\deltarune64.z64"],
+            "preLaunchTask": "Build rom",
+            "cwd": "./"
+        },
+        {
+            "type": "cppdbg",
+            "request":"launch",
+            "name": "Send to Console",
+            "program":"${workspaceFolder}\\UNFLoader.exe",
+            "args":["-r ${workspaceFolder}\\deltarune64.z64", ""],
             "preLaunchTask": "Build rom",
             "cwd": "./"
         }
