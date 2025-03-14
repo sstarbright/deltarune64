@@ -17,13 +17,17 @@ int main(void)
     t3d_init((T3DInitParams){});
     cosmesh_init();
     model_cache_create(1);
-    load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil", 0, 0);
+    load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil");
 
     Actor* jevil = malloc(sizeof(Actor));
     actor_init(jevil, "ENEMYJevil");
 
     Mesh3DModule* jevil_mesh = malloc(sizeof(Mesh3DModule));
-    mesh3d_module_create(jevil_mesh, "Jevil");
+    mesh3d_module_create(jevil_mesh, "Jevil", 1, 1);
+    jevil_mesh->animations[0].animation = t3d_anim_create(jevil_mesh->model->model, "Dance");
+    strcpy(jevil_mesh->animations[0].name, "Dance");
+    t3d_anim_attach(&jevil_mesh->animations[0].animation, &jevil_mesh->skeletons[0]);
+    jevil_mesh->looping = &jevil_mesh->animations[0];
     actor_add_module(jevil, (Module*)jevil_mesh, false);
     Trans3DModule* jevil_trans = &jevil_mesh->render.transform;
 
@@ -34,6 +38,15 @@ int main(void)
     jevil_cam_trans->position.y = 50.f;
     jevil_cam_trans->position.z = 140.f;
     trans3d_update_matrix(jevil_cam_trans);
+
+    DirLite3DModule* test_light = malloc(sizeof(DirLite3DModule));
+    dirlite3d_module_create(test_light, "TestLight");
+    actor_add_module(jevil, (Module*)test_light, false);
+    Trans3DModule* test_light_trans = &test_light->render.transform;
+    test_light_trans->rotation.x = T3D_DEG_TO_RAD(-70.f);
+    trans3d_update_matrix(test_light_trans);
+
+    uint8_t colorAmbient[4] = {0x16, 0x11, 0x22, 0xFF};
 
     rdpq_font_t* fnt = rdpq_font_load_builtin(FONT_BUILTIN_DEBUG_MONO);
     rdpq_font_style(fnt, 1, &(rdpq_fontstyle_t){RGBA32(0xAA, 0xAA, 0xFF, 0xFF)});
@@ -68,9 +81,6 @@ int main(void)
         // Update stages here
         actor_life(jevil, deltaTime);
 
-        test_light_trans->rotation.y += deltaTime * 3.f;
-        trans3d_update_matrix(test_light_trans);
-
         rdpq_attach(display_get(), display_get_zbuf());
         t3d_frame_start();
 
@@ -82,8 +92,9 @@ int main(void)
 
         t3d_light_set_count(coslite_get_count());
         // Draw lights here
+        test_light->render.draw(&test_light->render, deltaTime, matrixIdx);
 
-        t3d_light_set_ambient({0x16, 0x11, 0x22, 0xFF});
+        t3d_light_set_ambient(colorAmbient);
 
         // Draw meshes here
         jevil_mesh->render.draw(&jevil_mesh->render, deltaTime, matrixIdx);
