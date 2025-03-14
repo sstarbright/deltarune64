@@ -16,8 +16,13 @@ int main(void)
     rdpq_init();
     t3d_init((T3DInitParams){});
     cosmesh_init();
-    model_cache_create(1);
+    model_cache_create(2);
     load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil");
+    CachedModel* TestCutscene = load_model_into_cache("rom:/mdl_jevil_scene_test.t3dm", "TestCutscene");
+    SkinnedAnimation TestCutsceneAnim;
+    TestCutsceneAnim.animation = t3d_anim_create(TestCutscene->model, "TestCutscene");
+    t3d_anim_set_looping(&TestCutsceneAnim.animation, false);
+    t3d_anim_set_playing(&TestCutsceneAnim.animation, false);
 
     Actor* jevil = malloc(sizeof(Actor));
     actor_init(jevil, "ENEMYJevil");
@@ -27,6 +32,7 @@ int main(void)
     jevil_mesh->animations[0].animation = t3d_anim_create(jevil_mesh->model->model, "Dance");
     strcpy(jevil_mesh->animations[0].name, "Dance");
     t3d_anim_attach(&jevil_mesh->animations[0].animation, &jevil_mesh->skeletons[0]);
+    t3d_anim_attach(&TestCutsceneAnim.animation, &jevil_mesh->skeletons[0]);
     jevil_mesh->looping = &jevil_mesh->animations[0];
     actor_add_module(jevil, (Module*)jevil_mesh, false);
     Trans3DModule* jevil_trans = &jevil_mesh->render.transform;
@@ -43,7 +49,7 @@ int main(void)
     dirlite3d_module_create(test_light, "TestLight");
     actor_add_module(jevil, (Module*)test_light, false);
     Trans3DModule* test_light_trans = &test_light->render.transform;
-    test_light_trans->rotation.x = T3D_DEG_TO_RAD(-70.f);
+    test_light_trans->rotation.x = T3D_DEG_TO_RAD(-75.f);
     trans3d_update_matrix(test_light_trans);
 
     uint8_t colorAmbient[4] = {0x16, 0x11, 0x22, 0xFF};
@@ -55,12 +61,16 @@ int main(void)
     float lastTime = get_time_s() - (1.0f / 60.0f);
 
     audio_init(44100, 4);
-    mixer_init(8);
+    mixer_init(10);
     xm64player_t xm;
     xm64player_open(&xm, "rom:/trk_jevil_battle.xm64");
-    xm64player_play(&xm, 0);
+    xm64player_play(&xm, 2);
+
+    wav64_t spin_sound;
+    wav64_open(&spin_sound, "rom:/snd_hypnosis_ch1.wav64");
 
     for (uint32_t frame=0; ;++frame) {
+        joypad_poll();
         if (audio_can_write()) {
             // Select an audio buffer that we can write to
             short *buf = audio_write_begin();
@@ -70,6 +80,16 @@ int main(void)
             // been filled and is ready for playback
             audio_write_end();
         }
+        joypad_inputs_t joypad = joypad_get_inputs(JOYPAD_PORT_1);
+        joypad_buttons_t btn = joypad_get_buttons_pressed(JOYPAD_PORT_1);
+
+        if ((btn.a || btn.b ) && !TestCutsceneAnim.animation.isPlaying) {
+            t3d_anim_set_playing(&TestCutsceneAnim.animation, true);
+            t3d_anim_set_time(&TestCutsceneAnim.animation, 0.0f);
+            jevil_mesh->oneshot = &TestCutsceneAnim;
+            wav64_play(&spin_sound, 0);
+        }
+
         float newTime = get_time_s();
         float deltaTime = newTime - lastTime;
         lastTime = newTime;
@@ -77,6 +97,9 @@ int main(void)
         uint32_t matrixIdx = frame % display_get_num_buffers();
 
         coslite_new_frame();
+
+        /*jevil_trans->rotation.y += deltaTime * 2.f;
+        trans3d_update_matrix(jevil_trans);*/
 
         // Update stages here
         actor_life(jevil, deltaTime);
