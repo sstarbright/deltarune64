@@ -27,30 +27,30 @@ int main(void)
     Actor* jevil = malloc(sizeof(Actor));
     actor_init(jevil, "ENEMYJevil");
 
-    Mesh3DModule* jevil_mesh = malloc(sizeof(Mesh3DModule));
-    mesh3d_module_create(jevil_mesh, "Jevil", 1, 1);
+    Mesh3DM* jevil_mesh = malloc(sizeof(Mesh3DM));
+    mesh3dm_create(jevil_mesh, "Jevil", 1, 1);
     jevil_mesh->animations[0].animation = t3d_anim_create(jevil_mesh->model->model, "Dance");
     strcpy(jevil_mesh->animations[0].name, "Dance");
     t3d_anim_attach(&jevil_mesh->animations[0].animation, &jevil_mesh->skeletons[0]);
     t3d_anim_attach(&TestCutsceneAnim.animation, &jevil_mesh->skeletons[0]);
     jevil_mesh->looping = &jevil_mesh->animations[0];
     actor_add_module(jevil, (Module*)jevil_mesh, false);
-    Trans3DModule* jevil_trans = &jevil_mesh->render.transform;
+    Trans3DM* jevil_trans = &jevil_mesh->render.transform;
 
-    Camera3DModule* jevil_camera = malloc(sizeof(Camera3DModule));
-    camera3d_module_create(jevil_camera, "JevilCam");
+    Camera3DM* jevil_camera = malloc(sizeof(Camera3DM));
+    camera3dm_create(jevil_camera, "JevilCam");
     actor_add_module(jevil, (Module*)jevil_camera, false);
-    Trans3DModule* jevil_cam_trans = &jevil_camera->render.transform;
+    Trans3DM* jevil_cam_trans = &jevil_camera->render.transform;
     jevil_cam_trans->position.y = 50.f;
     jevil_cam_trans->position.z = 140.f;
-    trans3d_update_matrix(jevil_cam_trans);
+    trans3dm_update_matrix(jevil_cam_trans);
 
-    DirLite3DModule* test_light = malloc(sizeof(DirLite3DModule));
-    dirlite3d_module_create(test_light, "TestLight");
+    DirLite3DM* test_light = malloc(sizeof(DirLite3DM));
+    dirlite3dm_create(test_light, "TestLight");
     actor_add_module(jevil, (Module*)test_light, false);
-    Trans3DModule* test_light_trans = &test_light->render.transform;
+    Trans3DM* test_light_trans = &test_light->render.transform;
     test_light_trans->rotation.x = T3D_DEG_TO_RAD(-75.f);
-    trans3d_update_matrix(test_light_trans);
+    trans3dm_update_matrix(test_light_trans);
 
     uint8_t colorAmbient[4] = {0x16, 0x11, 0x22, 0xFF};
 
@@ -99,7 +99,7 @@ int main(void)
         coslite_new_frame();
 
         /*jevil_trans->rotation.y += deltaTime * 2.f;
-        trans3d_update_matrix(jevil_trans);*/
+        trans3dm_update_matrix(jevil_trans);*/
 
         // Update stages here
         actor_life(jevil, deltaTime);
@@ -135,6 +135,7 @@ int main(void)
         rdpq_detach_show();
     }
 
+    actor_kill(jevil);
     t3d_destroy();
     joypad_close();
     rdpq_close();
