@@ -14,7 +14,6 @@ int main(void)
     joypad_init();
 
     rdpq_init();
-    rdpq_debug_start();
 
     t3d_init((T3DInitParams){});
     cosmesh_init();
@@ -31,6 +30,10 @@ int main(void)
 
     Mesh3DM* jevil_mesh = malloc(sizeof(Mesh3DM));
     mesh3dm_create(jevil_mesh, "Jevil", 1, 1);
+    T3DMaterial* jevil_body = t3d_model_get_material(jevil_mesh->model->model, "body");
+    //jevil_body->blendMode = RDP_BLEND_MULTIPLY;
+    jevil_body->primColor = RGBA32(0xFF, 0x00, 0x00, 0x40);
+    //jevil_body->setColorFlags |= 0b001;
     jevil_mesh->animations[0].animation = t3d_anim_create(jevil_mesh->model->model, "Dance");
     strcpy(jevil_mesh->animations[0].name, "Dance");
     t3d_anim_attach(&jevil_mesh->animations[0].animation, &jevil_mesh->skeletons[0]);
@@ -122,6 +125,7 @@ int main(void)
         t3d_light_set_ambient(colorAmbient);
 
         // Draw meshes here
+        debugf("%i\n", jevil_body->setColorFlags);
         jevil_mesh->render.draw(&jevil_mesh->render, deltaTime, matrixIdx);
 
         rdpq_sync_pipe();
@@ -140,7 +144,6 @@ int main(void)
     actor_kill(jevil);
     t3d_destroy();
     joypad_close();
-    rdpq_debug_stop();
     rdpq_close();
     display_close();
 

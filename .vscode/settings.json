@@ -55,7 +55,9 @@
         "compare": "cpp",
         "cosmesh.h": "c",
         "stack": "c",
-        "valarray": "c"
+        "valarray": "c",
+        "cosstate.h": "c",
+        "*.tcc": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
