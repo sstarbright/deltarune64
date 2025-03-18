@@ -14,6 +14,8 @@ int main(void)
     joypad_init();
 
     rdpq_init();
+    rdpq_debug_start();
+
     t3d_init((T3DInitParams){});
     cosmesh_init();
     model_cache_create(2);
@@ -138,6 +140,7 @@ int main(void)
     actor_kill(jevil);
     t3d_destroy();
     joypad_close();
+    rdpq_debug_stop();
     rdpq_close();
     display_close();
 
