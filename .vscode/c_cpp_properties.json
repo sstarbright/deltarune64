@@ -9,7 +9,10 @@
             "defines": ["N64=1"],
             "includePath": [
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/../libdragon_toolchain/mips64-elf/include"
+                "${workspaceFolder}/../libdragon_toolchain/mips64-elf/include",
+                "${workspaceFolder}/cosmoslib64",
+                "${workspaceFolder}/libdragon/include",
+                "${workspaceFolder}/tiny3d/src/t3d"
             ],
             "compilerPath": "${workspaceFolder}/../libdragon_toolchain/bin/mips64-elf-gcc",
             "compilerArgs": [

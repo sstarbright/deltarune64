@@ -1,6 +1,5 @@
 #include "../cosmoslib64/coscam.h"
 #include "../cosmoslib64/coslite.h"
-#include "../cosmoslib64/cosdebug.h"
 
 float get_time_s()  { return (float)((double)get_ticks_ms() / 1000.0); }
 
@@ -18,41 +17,38 @@ int main(void)
     t3d_init((T3DInitParams){});
     cosmesh_init();
     model_cache_create(2);
-    load_model_into_cache("rom:/mdl_jevil.t3dm", "Jevil");
-    CachedModel* TestCutscene = load_model_into_cache("rom:/mdl_jevil_scene_test.t3dm", "TestCutscene");
+    load_model_into_cache("rom:/mdl_jevil.t3dm", 0);
+    CachedModel* TestCutscene = load_model_into_cache("rom:/mdl_jevil_scene_test.t3dm", 1);
     SkinnedAnimation TestCutsceneAnim;
     TestCutsceneAnim.animation = t3d_anim_create(TestCutscene->model, "TestCutscene");
     t3d_anim_set_looping(&TestCutsceneAnim.animation, false);
     t3d_anim_set_playing(&TestCutsceneAnim.animation, false);
 
     Actor* jevil = malloc(sizeof(Actor));
-    actor_init(jevil, "ENEMYJevil");
+    actor_init(jevil, 0);
 
     Mesh3DM* jevil_mesh = malloc(sizeof(Mesh3DM));
-    mesh3dm_create(jevil_mesh, "Jevil", 1, 1);
-    T3DMaterial* jevil_body = t3d_model_get_material(jevil_mesh->model->model, "body");
-    //jevil_body->blendMode = RDP_BLEND_MULTIPLY;
-    jevil_body->primColor = RGBA32(0xFF, 0x00, 0x00, 0x40);
-    //jevil_body->setColorFlags |= 0b001;
+    mesh3dm_create(jevil_mesh, 0, COMBINER_GLOW_OR, COMBINER_GLOW_XOR, 1, 1);
     jevil_mesh->animations[0].animation = t3d_anim_create(jevil_mesh->model->model, "Dance");
-    strcpy(jevil_mesh->animations[0].name, "Dance");
     t3d_anim_attach(&jevil_mesh->animations[0].animation, &jevil_mesh->skeletons[0]);
     t3d_anim_attach(&TestCutsceneAnim.animation, &jevil_mesh->skeletons[0]);
     jevil_mesh->looping = &jevil_mesh->animations[0];
-    actor_add_module(jevil, (Module*)jevil_mesh, false);
+    actor_add_module(jevil, (Module*)jevil_mesh, -1);
     Trans3DM* jevil_trans = &jevil_mesh->render.transform;
+    ((Render3DM*)jevil_mesh)->color = RGBA32(0x77, 0x00, 0x00, 0x66);
+    jevil_mesh->block = jevil_mesh->trans_block;
 
     Camera3DM* jevil_camera = malloc(sizeof(Camera3DM));
-    camera3dm_create(jevil_camera, "JevilCam");
-    actor_add_module(jevil, (Module*)jevil_camera, false);
+    camera3dm_create(jevil_camera);
+    actor_add_module(jevil, (Module*)jevil_camera, -1);
     Trans3DM* jevil_cam_trans = &jevil_camera->render.transform;
     jevil_cam_trans->position.y = 50.f;
     jevil_cam_trans->position.z = 140.f;
     trans3dm_update_matrix(jevil_cam_trans);
 
     DirLite3DM* test_light = malloc(sizeof(DirLite3DM));
-    dirlite3dm_create(test_light, "TestLight");
-    actor_add_module(jevil, (Module*)test_light, false);
+    dirlite3dm_create(test_light);
+    actor_add_module(jevil, (Module*)test_light, -1);
     Trans3DM* test_light_trans = &test_light->render.transform;
     test_light_trans->rotation.x = T3D_DEG_TO_RAD(-75.f);
     trans3dm_update_matrix(test_light_trans);
@@ -109,6 +105,8 @@ int main(void)
         // Update stages here
         actor_life(jevil, deltaTime);
 
+        jevil_mesh->render.predraw(&jevil_mesh->render, deltaTime, matrixIdx);
+
         rdpq_attach(display_get(), display_get_zbuf());
         t3d_frame_start();
 
@@ -124,8 +122,8 @@ int main(void)
 
         t3d_light_set_ambient(colorAmbient);
 
+        rdpq_set_prim_color(RGBA32(0xFF,0xFF,0xFF,0xFF));
         // Draw meshes here
-        debugf("%i\n", jevil_body->setColorFlags);
         jevil_mesh->render.draw(&jevil_mesh->render, deltaTime, matrixIdx);
 
         rdpq_sync_pipe();
