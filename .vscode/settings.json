@@ -57,7 +57,9 @@
         "stack": "c",
         "valarray": "c",
         "cosstate.h": "c",
-        "*.tcc": "c"
+        "*.tcc": "c",
+        "limits": "c",
+        "utility": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
