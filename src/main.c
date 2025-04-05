@@ -26,11 +26,17 @@ int main(void)
     actor_add_module(jevil, (Module*)jevil_mesh, -1);
 
     StateM* jevil_state = malloc(sizeof(StateM));
-    statem_create(jevil_state, 1, sizeof(AnimSt));
+    statem_create(jevil_state, 2, sizeof(AnimSt));
+    actor_add_module(jevil, (Module*)jevil_state, -1);
     jevil_state->main_skel = &jevil_mesh->skeletons[0];
     jevil_state->blend_skel = &jevil_mesh->skeletons[1];
-    AnimSt* idle_state = animst_create(jevil_state, malloc(sizeof(AnimSt)), 0, 0, 0, jevil_model->model, "Dance");
-    actor_add_module(jevil, (Module*)jevil_state, -1);
+    AnimSt* idle_state = animst_create(jevil_state, malloc(sizeof(AnimSt)), 0, 1, 0, jevil_model->model, "Dance");
+    AnimSt* spin_state = animst_create(jevil_state, malloc(sizeof(AnimSt)), 1, 1, 1, TestCutscene->model, "TestCutscene");
+    statetr_create(jevil_state, 0, 1, .25f);
+    statetr_create(jevil_state, 1, 0, .5f);
+    AnimEv* trans_event = animev_create(spin_state, 0, .50f);
+    trans_event->data = (void*)0;
+    trans_event->action = transev_action;
 
     Camera3DM* jevil_camera = malloc(sizeof(Camera3DM));
     camera3dm_create(jevil_camera);
@@ -68,12 +74,10 @@ int main(void)
 
         coslib_life(frame, deltaTime);
 
-        /*if ((btn.a || btn.b ) && !TestCutsceneAnim.animation.isPlaying) {
-            t3d_anim_set_playing(&TestCutsceneAnim.animation, true);
-            t3d_anim_set_time(&TestCutsceneAnim.animation, 0.0f);
-            jevil_mesh->oneshot = &TestCutsceneAnim;
+        if ((cosjoy_get_btn().a || cosjoy_get_btn().b ) && (AnimSt*)jevil_state->current_state == idle_state) {
+            jevil_state->target_state = 1;
             wav64_play(&spin_sound, 0);
-        }*/
+        }
 
         coslib_draw(frame, deltaTime);
     }

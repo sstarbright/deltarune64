@@ -16,12 +16,12 @@ ROM := $(TARGET).z64
 ELF := $(BUILD_DIR)/$(TARGET).elf
 DFS := $(BUILD_DIR)/$(TARGET).dfs
 
-IMAGE_LIST = $(wildcard $(ASSETS_DIR)/*.png)
-FONT_LIST  = $(wildcard $(ASSETS_DIR)/*.ttf)
-MODEL_LIST  = $(wildcard $(ASSETS_DIR)/*.glb)
-SOUND_LIST  = $(wildcard $(ASSETS_DIR)/*.wav)
-SOUND2_LIST  = $(wildcard $(ASSETS_DIR)/*.mp3)
-MUSIC_LIST  = $(wildcard $(ASSETS_DIR)/*.xm)
+IMAGE_LIST = $(shell find assets/ -type f -name '*.png')
+FONT_LIST  = $(shell find assets/ -type f -name '*.ttf')
+MODEL_LIST  = $(shell find assets/ -type f -name '*.glb')
+SOUND_LIST  = $(shell find assets/ -type f -name '*.wav')
+SOUND2_LIST = $(shell find assets/ -type f -name '*.mp3')
+MUSIC_LIST  = $(shell find assets/ -type f -name '*.xm')
 ASSETS_LIST += $(subst $(ASSETS_DIR),$(FILESYSTEM_DIR),$(IMAGE_LIST:%.png=%.sprite))
 ASSETS_LIST += $(subst $(ASSETS_DIR),$(FILESYSTEM_DIR),$(FONT_LIST:%.ttf=%.font64))
 ASSETS_LIST += $(subst $(ASSETS_DIR),$(FILESYSTEM_DIR),$(MODEL_LIST:%.glb=%.t3dm))
@@ -50,6 +50,8 @@ $(FILESYSTEM_DIR)/%.t3dm: $(ASSETS_DIR)/%.glb
 	@echo "    [T3D-MODEL] $@"
 	$(T3D_GLTF_TO_3D) $(T3DM_FLAGS) "$<" $@
 	$(N64_BINDIR)/mkasset -c 2 -o $(dir $@) $@
+
+AUDIOCONV_FLAGS = --wav-resample 32000 --wav-mono
 
 $(FILESYSTEM_DIR)/%.wav64: $(ASSETS_DIR)/%.wav
 	@mkdir -p $(dir $@)
